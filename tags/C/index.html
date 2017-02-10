@@ -3,18 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Linux fork 后 wait 获取子进程结束的状态示例 | Alan&#39;s Blog</title>
+  <title>Tag: C | Alan&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="使用 fork 后，可能需要获取 fork 的进程的运行状况，比如有没有异常、崩溃。wait 在 man 中关键的描述如下：All  of  these system calls are used to wait for state changes in a child of the calling process, and obtain information about the child w">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Linux fork 后 wait 获取子进程结束的状态示例">
-<meta property="og:url" content="http://wrcode.com/2015/07/01/Linux-fork-后-wait-获取子进程结束的状态示例/">
+  <meta name="description" content="Linux C Alan 阿然">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alan's Blog">
+<meta property="og:url" content="http://wrcode.com/tags/C/">
 <meta property="og:site_name" content="Alan's Blog">
-<meta property="og:description" content="使用 fork 后，可能需要获取 fork 的进程的运行状况，比如有没有异常、崩溃。wait 在 man 中关键的描述如下：All  of  these system calls are used to wait for state changes in a child of the calling process, and obtain information about the child w">
-<meta property="og:image" content="/images/Linux-fork-后-wait-获取子进程结束的状态示例.png">
+<meta property="og:description" content="Linux C Alan 阿然">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux fork 后 wait 获取子进程结束的状态示例">
-<meta name="twitter:description" content="使用 fork 后，可能需要获取 fork 的进程的运行状况，比如有没有异常、崩溃。wait 在 man 中关键的描述如下：All  of  these system calls are used to wait for state changes in a child of the calling process, and obtain information about the child w">
+<meta name="twitter:title" content="Alan's Blog">
+<meta name="twitter:description" content="Linux C Alan 阿然">
 
   
   
@@ -162,152 +161,39 @@
   
 </aside>
         
-        <section id="main"><article id="post-Linux-fork-后-wait-获取子进程结束的状态示例" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/07/01/Linux-fork-后-wait-获取子进程结束的状态示例/" class="article-date">
-  <time datetime="2015-07-01T11:55:59.000Z" itemprop="datePublished">Jul 1 2015</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Linux-C/">Linux C</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      Linux fork 后 wait 获取子进程结束的状态示例
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2017" class="archive-year">2017</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2017/02/10/线程创建-pthread-create-中自定义参数注意事项/" class="archive-article-date">
+  <time datetime="2017-02-09T23:54:32.000Z" itemprop="datePublished">Feb 10</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2017/02/10/线程创建-pthread-create-中自定义参数注意事项/">线程创建 pthread_create 中自定义参数注意事项</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>使用 fork 后，可能需要获取 fork 的进程的运行状况，比如有没有异常、崩溃。<br>wait 在 man 中关键的描述如下：<br>All  of  these system calls are used to wait for state changes in a child of the calling process, and obtain information about the child whose state has changed.  A state change is considered to be: the child terminated; the child was stopped by a signal; or the child was resumed by a signal.</p>
-<p>示例代码：<br><a id="more"></a></p>
-<pre><code><span class="preprocessor">#<span class="keyword">include</span> &lt;stdio.h&gt;</span>
-<span class="preprocessor">#<span class="keyword">include</span> &lt;stdlib.h&gt;</span>
-<span class="preprocessor">#<span class="keyword">include</span> &lt;unistd.h&gt;</span>
-<span class="preprocessor">#<span class="keyword">include</span> &lt;sys/types.h&gt;</span>
-<span class="preprocessor">#<span class="keyword">include</span> &lt;sys/wait.h&gt;</span>
-
-<span class="keyword">int</span> main(<span class="keyword">void</span>)
-{
-    pid_t pid;
-    <span class="keyword">int</span> status;
-
-    <span class="built_in">printf</span>(<span class="string">"before fork\n"</span>);
-    fflush(stdout);
-
-    <span class="keyword">if</span> ( (pid = fork()) &lt; <span class="number">0</span>)
-    {
-        <span class="built_in">printf</span>(<span class="string">"fork error\n"</span>);
-    }
-    <span class="keyword">else</span> <span class="keyword">if</span> (pid == <span class="number">0</span>)
-    {
-        <span class="built_in">printf</span>(<span class="string">"after fork, child\n"</span>);
-
-        <span class="comment">// 4种测试情况</span>
-        <span class="built_in">exit</span>(<span class="number">7</span>); <span class="comment">// -&gt; normal termination, exitstatus = 7</span>
-        <span class="comment">// abort(); // -&gt; abnormal termination, signalstatus = 6 (SIGABRT)</span>
-        <span class="comment">// int i = 1 / 0; // -&gt; abnormal termination, signalstatus = 8 (SIGFPE)</span>
-        <span class="comment">// char *p = NULL; *p = 'a'; // -&gt; abnormal termination, signalstatus = 11 (SIGSEGV)</span>
-    }
-
-    wait(&amp;status);
-
-    <span class="keyword">if</span> (WIFEXITED(status))
-    {
-        <span class="built_in">printf</span>(<span class="string">"normal termination, exitstatus = %d\n"</span>, WEXITSTATUS(status));
-    }
-    <span class="keyword">else</span> <span class="keyword">if</span> (WIFSIGNALED(status))
-    {
-        <span class="built_in">printf</span>(<span class="string">"abnormal termination, signalstatus = %d\n"</span>, WTERMSIG(status), 
-<span class="preprocessor">#ifdef WCOREDUMP</span>
-        WCOREDUMP(status)?<span class="string">"(core file generated)"</span>:<span class="string">""</span>); 
-<span class="preprocessor">#<span class="keyword">else</span> </span>
-        <span class="string">""</span>);
-<span class="preprocessor">#<span class="keyword">endif</span></span>
-    }
-    <span class="keyword">else</span> <span class="keyword">if</span> (WIFSTOPPED(status))
-    {
-        <span class="built_in">printf</span>(<span class="string">"child stopped, signal number = %d\n"</span>, WSTOPSIG(status));
-    }
-
-    <span class="built_in">printf</span>(<span class="string">"after fork, parent\n"</span>);
-
-    <span class="keyword">return</span> <span class="number">0</span>;
-}
-</code></pre><p>运行效果：<br><img src="/images/Linux-fork-后-wait-获取子进程结束的状态示例.png" alt="wait status"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <!-- <a data-url="http://wrcode.com/2015/07/01/Linux-fork-后-wait-获取子进程结束的状态示例/" data-id="z756fyiqd7w75ad6" class="article-share-link">Share</a> -->
-      <!-- 百度分享 -->
-      <div class="bdsharebuttonbox" style="float:right"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a></div>
-<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
-
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/fork/">fork</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/status/">status</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wait/">wait</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2015/09/18/文本编辑器-16进制编辑器-MadEdit-推荐/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          文本编辑器/16进制编辑器 MadEdit 推荐
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2015/04/27/Linux-最简单内核模块-Hello-World-示例/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Linux 最简单内核模块 Hello World 示例</div>
-    </a>
-  
-</nav>
-
-  
 </article>
-
-<!--
-
--->
-
-
-  <section id="comments">
-    <!-- 多说评论框 start -->
-    <div class="ds-thread" data-thread-key="post-Linux-fork-后-wait-获取子进程结束的状态示例" data-title="Linux fork 后 wait 获取子进程结束的状态示例" data-url="http://wrcode.com/2015/07/01/Linux-fork-后-wait-获取子进程结束的状态示例/"></div>
-    <!-- 多说评论框 end -->
-    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-    <script type="text/javascript">
-    var duoshuoQuery = {short_name:'wrcode'};
-      (function() {
-        var ds = document.createElement('script');
-        ds.type = 'text/javascript';ds.async = true;
-        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-        ds.charset = 'UTF-8';
-        (document.getElementsByTagName('head')[0] 
-         || document.getElementsByTagName('body')[0]).appendChild(ds);
-      })();
-      </script>
-    <!-- 多说公共JS代码 end -->
-  </section>
   
-
+  
+    </div></section>
+  
 </section>
       </div>
       <footer id="footer">
